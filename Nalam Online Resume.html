@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text color */
+            scroll-behavior: smooth;
+            overflow-y: scroll; /* Prevents content shifting when the modal opens */
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .section {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+        .nav-link {
+            transition: color 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            color: #4299e1;
+        }
+        .social-link {
+            transition: transform 0.2s ease-in-out;
+        }
+        .social-link:hover {
+            transform: translateY(-5px) scale(1.1);
+            color: #4299e1;
+        }
+        .project-card {
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0; /* Starts hidden */
+            visibility: hidden; /* Hides modal from screen readers and pointer events */
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #2d3748;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            max-width: 700px;
+            width: 90%;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease-out;
+        }
+        .modal.show .modal-content {
+            transform: scale(1); /* Animate to normal size */
+        }
+        .close-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .close-button:hover {
+            color: #e2e8f0;
+        }
+        /* Marquee Animation */
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+            animation: marquee 10s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        /* Fade-in Animation on Load */
+        .animate-on-load {
+            animation: fadeInUp 0.9s ease-out forwards;
+            opacity: 0;
+            animation-delay: var(--delay, 0s); 
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        /* Notification styles */
+        #notification {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1001;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        #notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        /* Bell animation */
+        .bell-icon {
+            display: inline-block;
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+            transform-origin: top center;
+        }
+        @keyframes shake {
+            10%, 90% { transform: rotate(-15deg); }
+            20%, 80% { transform: rotate(15deg); }
+            30%, 50%, 70% { transform: rotate(-15deg); }
+            40%, 60% { transform: rotate(15deg); }
+            100% { transform: rotate(0); }
+        }
+        /* Animation for the button's background color to match the video */
+        @keyframes color-change-animation {
+            0% { background-color: #8c4568; } /* A deeper purplish-red */
+            50% { background-color: #e76747; } /* A vibrant orange-red */
+            100% { background-color: #8c4568; } /* Back to the deeper purplish-red */
+        }
+        /* The animation is applied to the button */
+        .view-work-button-effect {
+            animation: color-change-animation 5s linear infinite;
+        }
+        /* New animation for the pulsing effect */
+        @keyframes pulse-effect {
+            0% { transform: scale(1); color: #8c4568; }
+            50% { transform: scale(1.05); color: #a1ed63; }
+            100% { transform: scale(1); color: #4299e1; }
+        } 
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .scrolling-text {
+            display: inline-block;
+            animation: marquee 8s linear infinite;
+        }
+        /* Apply the new pulsing animation to the heading */
+        .animate-pulse-heading {
+            animation: pulse-effect 10s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <header class="bg-gray-800 p-4 fixed top-0 w-full z-50 shadow-lg animate-on-load" style="--delay: 0s;">
+        <nav class="container mx-auto flex justify-between items-center">
+            <a href="#hero" class="text-2xl font-extrabold text-pink-400">My Portfolio</a>
+            <div class="space-x-4 text-lg hidden md:block">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+        </nav>
+    </header>
+
+    <div id="notification" class="bg-gray-800 text-white py-3 px-6 rounded-lg shadow-lg flex items-center">
+        <span id="notification-icon" class="text-yellow-400 mr-2">
+            <i class="fas fa-bell bell-icon"></i>
+        </span>
+        <span id="notification-message"></span>
+    </div>
+
+    <section id="hero" class="section flex items-center justify-center min-h-screen pt-16 text-center animate-on-load relative" style="--delay: 0.2s;">
+    <div class="container px-4">
+        <div>
+            <div class="overflow-hidden">
+                <h1 class="text-4xl sm:text-5xl lg:text-7xl font-extrabold mb-4 text-blue-400 animate-pulse-heading"> <span class="scrolling-text">Hello, I'm Noel Ibrahim Nalam</span></h1>
+            </div>
+            <p class="text-lg sm:text-xl lg:text-2xl mb-8 max-w-2xl mx-auto font-light">A passionate web developer specializing in creating beautiful and functional user experiences. I love turning ideas into reality with code.</p>
+           <a href="#projects" class="inline-block text-white font-bold py-3 px-8 rounded-full shadow-lg transition-colors duration-300 view-work-button-effect">
+    View My Work
+</a>
+        </div>
+    </div>
+    </section>
+
+    ---
+
+    <section id="about" class="section bg-gray-800 animate-on-load" style="--delay: 0.4s;">
+        <div class="container px-4">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-blue-400">About Me</h2>
+            <div class="flex flex-col md:flex-row items-center md:space-x-12">
+                <div class="md:w-1/3 mb-8 md:mb-0">
+                    <img src="c:\xampp\htdocs\mywebsite\launch.json file\Nalam profile class.jpg" alt="Profile Picture" class="rounded-full w-48 h-48 mx-auto object-cover border-4 border-blue-300">
+                </div>
+                <div class="md:w-2/3 text-lg leading-relaxed">
+                    <p class="mb-4">I'm a  developer with a passion for clean, efficient, and modern web design. I have hands-on experience in various technologies and enjoy tackling complex problems to build scalable solutions.</p>
+                    <p class="mb-4">My journey into coding started with a curiosity for how websites are built, and it quickly grew into a full-blown passion. I am always ready to learn new technologies and improve my skills.</p>
+                    <h3 class="text-2xl font-bold mt-8 mb-4">Skills</h3>
+                    <div class="flex flex-wrap gap-4 text-xl">
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fab fa-html5 mr-2 text-orange-500"></i>HTML5
+                        </span>
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fab fa-css3-alt mr-2 text-blue-500"></i>CSS3
+                        </span>
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fab fa-js mr-2 text-yellow-500"></i>JavaScript
+                        </span>
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fab fa-react mr-2 text-blue-300"></i>React
+                        </span>
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fab fa-node-js mr-2 text-green-500"></i>Node.js
+                        </span>
+                        <span class="bg-gray-700 rounded-full px-4 py-2 flex items-center">
+                            <i class="fas fa-database mr-2 text-gray-500"></i>Databases
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    ---
+
+    <section id="projects" class="section animate-on-load" style="--delay: 0.6s;">
+        <div class="container px-4">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-blue-400">My Projects</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="projects-container">
+            </div>
+        </div>
+    </section>
+
+    ---
+
+    <section id="contact" class="section bg-gray-800 animate-on-load" style="--delay: 0.8s;">
+        <div class="container px-4">
+            <h2 class="text-3xl sm:text-4xl font-bold text-center mb-12 text-blue-400">Get in Touch</h2>
+            <div class="max-w-lg mx-auto">
+                <form id="contact-form" class="space-y-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium">Name</label>
+                        <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-400 focus:ring-blue-400 text-white p-2" placeholder="Your Name" required>
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium">Email</label>
+                        <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-400 focus:ring-blue-400 text-white p-2" placeholder="youremail@example.com" required>
+                    </div>
+                    <div>
+                        <label for="message" class="block text-sm font-medium">Message</label>
+                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-md bg-gray-700 border-gray-600 focus:border-blue-400 focus:ring-blue-400 text-white p-2" placeholder="Your message..." required></textarea>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="inline-block bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-blue-600 transition-colors duration-300">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Message
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    ---
+
+    <footer class="bg-gray-900 py-6 text-center animate-on-load" style="--delay: 1s;">
+        <div class="container px-4">
+            <div class="flex justify-center space-x-6 text-2xl mb-4">
+                <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+            </div>
+            <p class="text-gray-400">&copy; 2025 Nalam. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="close-modal-btn">&times;</span>
+            <div id="modal-content-wrapper">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array of project data
+        const projectsData = [
+            {
+                id: '1',
+                title: 'Project One: Simple Calculator',
+                image: 'https://placehold.co/600x400/4a5568/a0aec0?text=Calculator',
+                shortDescription: 'A web-based calculator that performs basic arithmetic operations. It demonstrates UI design and JavaScript logic.',
+                longDescription: "A fully functional calculator built with vanilla JavaScript, HTML, and Tailwind CSS. It handles basic operations like addition, subtraction, multiplication, and division, and includes a clear button to reset the display. The clean, modern interface is designed for easy use on any device.",
+                isCalculator: true,
+                githubLink: '#',
+                liveLink: '#'
+            },
+            {
+                id: '2',
+                title: 'Project Two: Catch the ball Game',
+                image: 'https://placehold.co/600x400/2a4365/ffffff?text=Play+Game',
+                shortDescription: 'A simple, interactive web game built with vanilla JavaScript. Catch the falling ball to earn points!',
+                longDescription: "An addictive browser-based game where you control a paddle with your mouse to catch falling ball. Built with the HTML5 Canvas API, this project showcases real-time animation, collision detection, and score tracking. It’s a great example of dynamic content creation on the web.",
+                isGame: true,
+                githubLink: '#',
+                liveLink: '#'
+            },
+            {
+                id: '3',
+                title: 'Project Three: Interactive To-Do List',
+                image: 'https://placehold.co/600x400/4a5568/a0aec0?text=To-Do+List',
+                shortDescription: 'A responsive and dynamic to-do list application for managing your daily tasks. It uses local storage to save your progress.',
+                longDescription: "A powerful and user-friendly to-do list application. You can add, delete, and mark tasks as complete. The application uses the browser's local storage to persist your tasks, so they won't disappear when you close the tab. This project highlights a strong understanding of DOM manipulation and state management.",
+                isTodoList: true,
+                githubLink: '#',
+                liveLink: '#'
+            }
+        ];
+
+        // DOM Elements
+        const projectsContainer = document.getElementById('projects-container');
+        const modal = document.getElementById('project-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalContentWrapper = document.getElementById('modal-content-wrapper');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        const contactForm = document.getElementById('contact-form');
+        const notificationIcon = document.getElementById('notification-icon');
+
+        let gameFrameId;
+
+        // Function to show a temporary notification with an optional bell animation
+        function showNotification(message, animateBell = false) {
+            notificationMessage.textContent = message;
+            notification.classList.add('show');
+            if (animateBell) {
+                notificationIcon.classList.add('bell-icon');
+            }
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notificationIcon.classList.remove('bell-icon');
+            }, 3000);
+        }
+
+        // Function to create and append a project card
+        function createProjectCard(project) {
+            const card = document.createElement('div');
+            card.classList.add('bg-gray-800', 'rounded-lg', 'shadow-xl', 'p-6', 'project-card', 'animate-on-load');
+            card.style.setProperty('--delay', `${0.6 + (parseInt(project.id) * 0.1)}s`);
+            card.setAttribute('data-project-id', project.id);
+            card.innerHTML = `
+                <img src="${project.image}" alt="${project.title}" class="rounded-lg mb-4 w-full">
+                <h3 class="text-2xl font-bold mb-2">${project.title}</h3>
+                <p class="text-gray-400 mb-4">${project.shortDescription}</p>
+                <div class="flex space-x-4">
+                    <a href="${project.githubLink}" class="text-gray-400 hover:text-blue-400 transition-colors duration-300 social-link" onclick="event.stopPropagation();" target="_blank"><i class="fab fa-github text-2xl"></i></a>
+                    ${project.isGame || project.isCalculator || project.isTodoList ? `
+                        <button class="text-gray-400 hover:text-blue-400 transition-colors duration-300 social-link play-btn" data-project-id="${project.id}">
+                            <i class="fas fa-play-circle text-2xl"></i>
+                        </button>
+                    ` : `
+                        <a href="${project.liveLink}" class="text-gray-400 hover:text-blue-400 transition-colors duration-300 social-link" onclick="event.stopPropagation();" target="_blank">
+                            <i class="fas fa-link text-2xl"></i>
+                        </a>
+                    `}
+                </div>
+            `;
+            return card;
+        }
+
+        // Render all project cards
+        projectsData.forEach(project => {
+            const card = createProjectCard(project);
+            projectsContainer.appendChild(card);
+        });
+
+        // Function for the Catch the Star Game
+        function startGame(canvas) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = Math.min(canvas.width * 1.2, 500);
+
+            let score = 0;
+            let playerX = canvas.width / 2;
+            const playerWidth = 80;
+            const playerHeight = 10;
+            let star = {
+                x: Math.random() * canvas.width,
+                y: 0,
+                radius: 10,
+                speed: 2
+            };
+            let isGameOver = false;
+
+            function drawPlayer() {
+                ctx.beginPath();
+                ctx.rect(playerX - playerWidth / 2, canvas.height - playerHeight - 10, playerWidth, playerHeight);
+                ctx.fillStyle = '#4299e1';
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            function drawStar() {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#f6e05e';
+                ctx.fill();
+                ctx.closePath();
+            }
+            
+            function updateStar() {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    isGameOver = true;
+                }
+            }
+
+            function checkCollision() {
+                if (star.y + star.radius >= canvas.height - playerHeight - 10 && star.y + star.radius <= canvas.height - 10) {
+                    if (star.x >= playerX - playerWidth / 2 && star.x <= playerX + playerWidth / 2) {
+                        score++;
+                        star = {
+                            x: Math.random() * canvas.width,
+                            y: 0,
+                            radius: 10,
+                            speed: star.speed + 0.2
+                        };
+                    }
+                }
+            }
+
+            function drawScore() {
+                ctx.fillStyle = '#e2e8f0';
+                ctx.font = '20px Inter, sans-serif';
+                ctx.fillText(`Score: ${score}`, 10, 25);
+            }
+
+            function gameLoop() {
+                if (!isGameOver) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    drawPlayer();
+                    drawStar();
+                    updateStar();
+                    checkCollision();
+                    drawScore();
+                    gameFrameId = requestAnimationFrame(gameLoop);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = '30px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
+                    ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 40);
+                }
+            }
+
+            function handleMouseMove(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                playerX = (e.clientX - rect.left) * scaleX;
+            }
+
+            function handleTouchMove(e) {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                playerX = (e.touches[0].clientX - rect.left) * scaleX;
+            }
+
+            canvas.addEventListener('mousemove', handleMouseMove);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            gameLoop();
+        }
+
+        // Event listener for project card clicks and play buttons
+        projectsContainer.addEventListener('click', (event) => {
+            const card = event.target.closest('.project-card');
+            if (card) {
+                const projectId = card.getAttribute('data-project-id');
+                const project = projectsData.find(p => p.id === projectId);
+                if (!project) return;
+
+                modalContentWrapper.innerHTML = '';
+                
+                if (project.isGame) {
+                    modalContentWrapper.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h3 class="text-3xl font-bold mb-2 text-blue-400">${project.title}</h3>
+                            <p class="text-gray-300">${project.longDescription}</p>
+                            <p class="text-gray-400 text-sm mt-2">Use your mouse or finger to move the platform and catch the falling stars!</p>
+                        </div>
+                        <div class="bg-gray-700 rounded-lg p-2">
+                            <canvas id="game-canvas" class="w-full rounded-lg"></canvas>
+                        </div>
+                    `;
+                    modal.classList.add('show');
+                    const gameCanvas = document.getElementById('game-canvas');
+                    startGame(gameCanvas);
+                } else if (project.isCalculator) {
+                    modalContentWrapper.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h3 class="text-3xl font-bold mb-2 text-blue-400">${project.title}</h3>
+                            <p class="text-gray-300">${project.longDescription}</p>
+                        </div>
+                        <div class="bg-gray-700 rounded-lg p-4 max-w-sm mx-auto shadow-lg">
+                            <div class="mb-4">
+                                <input id="calculator-display" type="text" class="w-full text-right p-2 text-3xl font-bold bg-gray-800 rounded-md text-white border-2 border-gray-600" value="0" readonly>
+                            </div>
+                            <div class="grid grid-cols-4 gap-2">
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-500 transition-colors" data-value="C">C</button>
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-500 transition-colors" data-value="/">&divide;</button>
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-500 transition-colors" data-value="*">&times;</button>
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-500 transition-colors" data-value="-">-</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="7">7</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="8">8</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="9">9</button>
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold row-span-2 hover:bg-gray-500 transition-colors" data-value="+">+</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="4">4</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="5">5</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="6">6</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="1">1</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="2">2</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value="3">3</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold col-span-2 hover:bg-gray-700 transition-colors" data-value="0">0</button>
+                                <button class="bg-gray-800 text-white p-4 rounded-lg text-xl font-bold hover:bg-gray-700 transition-colors" data-value=".">.</button>
+                                <button class="bg-gray-600 text-white p-4 rounded-lg text-xl font-bold col-span-2 hover:bg-gray-500 transition-colors" data-value="=">=</button>
+                            </div>
+                        </div>
+                    `;
+                    modal.classList.add('show');
+                    
+                    const display = document.getElementById('calculator-display');
+                    let currentInput = '';
+                    let operator = null;
+                    let firstOperand = null;
+                    let shouldResetDisplay = false;
+
+                    document.querySelectorAll('.modal-content [data-value]').forEach(button => {
+                        button.addEventListener('click', () => {
+                            const value = button.dataset.value;
+
+                            if (value >= '0' && value <= '9' || value === '.') {
+                                if (shouldResetDisplay) {
+                                    currentInput = value;
+                                    shouldResetDisplay = false;
+                                } else {
+                                    currentInput += value;
+                                }
+                                display.value = currentInput;
+                            } else if (['+', '-', '*', '/'].includes(value)) {
+                                if (firstOperand === null) {
+                                    firstOperand = parseFloat(currentInput);
+                                } else if (operator && currentInput !== '') {
+                                    const result = eval(`${firstOperand} ${operator} ${currentInput}`);
+                                    firstOperand = result;
+                                    display.value = result;
+                                }
+                                operator = value;
+                                shouldResetDisplay = true;
+                            } else if (value === '=') {
+                                if (operator && currentInput !== '') {
+                                    const result = eval(`${firstOperand} ${operator} ${currentInput}`);
+                                    display.value = result;
+                                    firstOperand = result;
+                                    operator = null;
+                                    currentInput = '';
+                                    shouldResetDisplay = true;
+                                }
+                            } else if (value === 'C') {
+                                currentInput = '';
+                                operator = null;
+                                firstOperand = null;
+                                display.value = '0';
+                                shouldResetDisplay = false;
+                            }
+                        });
+                    });
+                } else if (project.isTodoList) {
+                    modalContentWrapper.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h3 class="text-3xl font-bold mb-2 text-blue-400">${project.title}</h3>
+                            <p class="text-gray-300">${project.longDescription}</p>
+                        </div>
+                        <div class="bg-gray-700 rounded-lg p-4 max-w-sm mx-auto shadow-lg">
+                            <div class="flex mb-4 space-x-2">
+                                <input type="text" id="todo-input" class="flex-grow p-2 rounded-lg bg-gray-800 text-white border-2 border-gray-600 focus:border-blue-400" placeholder="Add a new task...">
+                                <button id="add-todo-btn" class="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 transition-colors"><i class="fas fa-plus"></i></button>
+                            </div>
+                            <ul id="todo-list" class="space-y-2"></ul>
+                        </div>
+                    `;
+                    modal.classList.add('show');
+
+                    const todoInput = document.getElementById('todo-input');
+                    const addTodoBtn = document.getElementById('add-todo-btn');
+                    const todoList = document.getElementById('todo-list');
+                    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                    
+                    function saveTasks() {
+                        localStorage.setItem('tasks', JSON.stringify(tasks));
+                    }
+
+                    function renderTasks() {
+                        todoList.innerHTML = '';
+                        tasks.forEach((task, index) => {
+                            const li = document.createElement('li');
+                            li.classList.add('flex', 'justify-between', 'items-center', 'bg-gray-800', 'p-3', 'rounded-lg', 'task-item');
+                            if (task.completed) {
+                                li.classList.add('line-through', 'text-gray-500');
+                            }
+                            li.innerHTML = `
+                                <span class="flex-grow cursor-pointer" data-index="${index}">${task.text}</span>
+                                <div class="space-x-2">
+                                    <button class="text-green-400 hover:text-green-500 transition-colors" data-action="toggle" data-index="${index}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="text-red-400 hover:text-red-500 transition-colors" data-action="delete" data-index="${index}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            `;
+                            todoList.appendChild(li);
+                        });
+                    }
+
+                    function addTask() {
+                        const text = todoInput.value.trim();
+                        if (text) {
+                            tasks.push({ text, completed: false });
+                            todoInput.value = '';
+                            saveTasks();
+                            renderTasks();
+                            showNotification('Task added successfully!');
+                        }
+                    }
+
+                    function toggleTask(index) {
+                        tasks[index].completed = !tasks[index].completed;
+                        saveTasks();
+                        renderTasks();
+                        showNotification('Task updated!');
+                    }
+
+                    function deleteTask(index) {
+                        tasks.splice(index, 1);
+                        saveTasks();
+                        renderTasks();
+                        showNotification('Task deleted!');
+                    }
+
+                    addTodoBtn.addEventListener('click', addTask);
+                    todoInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            addTask();
+                        }
+                    });
+                    todoList.addEventListener('click', (e) => {
+                        const target = e.target.closest('button, span');
+                        if (!target) return;
+                        const index = target.dataset.index;
+                        if (target.dataset.action === 'toggle') {
+                            toggleTask(index);
+                        } else if (target.dataset.action === 'delete') {
+                            deleteTask(index);
+                        } else if (target.tagName === 'SPAN') {
+                            toggleTask(index);
+                        }
+                    });
+                    renderTasks();
+                } else {
+                    modalContentWrapper.innerHTML = `
+                        <div class="text-center mb-4">
+                            <h3 class="text-3xl font-bold mb-2 text-blue-400">${project.title}</h3>
+                            <p class="text-gray-300">${project.longDescription}</p>
+                        </div>
+                        <img src="${project.image}" alt="${project.title}" class="rounded-lg mb-4 w-full">
+                        <div class="flex justify-center space-x-4">
+                            <a href="${project.githubLink}" target="_blank" class="bg-blue-500 text-white py-2 px-4 rounded-full hover:bg-blue-600 transition-colors">
+                                <i class="fab fa-github mr-2"></i>View on GitHub
+                            </a>
+                            <a href="${project.liveLink}" target="_blank" class="bg-green-500 text-white py-2 px-4 rounded-full hover:bg-green-600 transition-colors">
+                                <i class="fas fa-link mr-2"></i>Live Demo
+                            </a>
+                        </div>
+                    `;
+                    modal.classList.add('show');
+                }
+            }
+        });
+
+        // Event listener to close the modal
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.remove('show');
+            if (gameFrameId) {
+                cancelAnimationFrame(gameFrameId);
+                gameFrameId = null;
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.classList.remove('show');
+                if (gameFrameId) {
+                    cancelAnimationFrame(gameFrameId);
+                    gameFrameId = null;
+                }
+            }
+        });
+
+        // Example for contact form submission
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // In a real application, you would send this data to a backend server.
+            showNotification('Message sent successfully! 🚀', true);
+            contactForm.reset();
+        });
+
+    </script>
+</body>
+</html>
